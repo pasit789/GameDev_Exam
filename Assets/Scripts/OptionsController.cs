@@ -21,7 +21,7 @@ namespace Pasit
             // Auto find components if not assigned
             if (masterSlider == null || bgmSlider == null || sfxSlider == null)
             {
-                var sliders = FindObjectsByType<Slider>(FindObjectsSortMode.None);
+                var sliders = FindObjectsByType<Slider>(FindObjectsInactive.Include);
                 foreach (var s in sliders)
                 {
                     if (s.gameObject.name.Contains("Master") && masterSlider == null) masterSlider = s;
@@ -32,7 +32,7 @@ namespace Pasit
 
             if (masterValueText == null || bgmValueText == null || sfxValueText == null)
             {
-                var texts = FindObjectsByType<TextMeshProUGUI>(FindObjectsSortMode.None);
+                var texts = FindObjectsByType<TextMeshProUGUI>(FindObjectsInactive.Include);
                 foreach (var t in texts)
                 {
                     if (t.gameObject.name.Contains("Master") && masterValueText == null) masterValueText = t;
@@ -107,7 +107,8 @@ namespace Pasit
         {
             if (masterValueText != null)
             {
-                masterValueText.text = "Master Volume: " + Mathf.RoundToInt(value * 100f) + "%";
+                int pct = Mathf.RoundToInt(value * 100f);
+                masterValueText.text = masterValueText.name.Contains("Badge") ? $"{pct}%" : $"Master Volume: {pct}%";
             }
         }
 
@@ -115,7 +116,8 @@ namespace Pasit
         {
             if (bgmValueText != null)
             {
-                bgmValueText.text = "BGM Volume: " + Mathf.RoundToInt(value * 100f) + "%";
+                int pct = Mathf.RoundToInt(value * 100f);
+                bgmValueText.text = bgmValueText.name.Contains("Badge") ? $"{pct}%" : $"BGM Volume: {pct}%";
             }
         }
 
@@ -123,7 +125,8 @@ namespace Pasit
         {
             if (sfxValueText != null)
             {
-                sfxValueText.text = "SFX Volume: " + Mathf.RoundToInt(value * 100f) + "%";
+                int pct = Mathf.RoundToInt(value * 100f);
+                sfxValueText.text = sfxValueText.name.Contains("Badge") ? $"{pct}%" : $"SFX Volume: {pct}%";
             }
         }
     }
