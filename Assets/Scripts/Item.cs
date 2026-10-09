@@ -20,16 +20,20 @@ namespace Pasit
             switch (type)
             {
                 case ItemType.AddTime:
-                    GameManager.Instance.AddTime(3f);
+                    if (GameManager.Instance != null) GameManager.Instance.AddTime(3f);
+                    if (AudioManager.Instance != null) AudioManager.Instance.PlayItemSFX();
                     break;
                 case ItemType.ReduceTime:
-                    GameManager.Instance.AddTime(-5f);
+                    if (GameManager.Instance != null) GameManager.Instance.AddTime(-5f);
+                    if (AudioManager.Instance != null) AudioManager.Instance.PlayObstacleSFX();
                     break;
                 case ItemType.AddScore:
-                    GameManager.Instance.AddScore(500);
+                    if (GameManager.Instance != null) GameManager.Instance.AddScore(500);
+                    if (AudioManager.Instance != null) AudioManager.Instance.PlayItemSFX();
                     break;
                 case ItemType.ReduceScore:
-                    GameManager.Instance.AddScore(-500);
+                    if (GameManager.Instance != null) GameManager.Instance.AddScore(-500);
+                    if (AudioManager.Instance != null) AudioManager.Instance.PlayObstacleSFX();
                     break;
             }
             Destroy(gameObject);

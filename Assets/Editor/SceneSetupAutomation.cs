@@ -6,6 +6,7 @@ using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.EventSystems;
+using UnityEngine.InputSystem.UI;
 using UnityEngine.UI;
 using TMPro;
 using Pasit;
@@ -16,6 +17,7 @@ public class SceneSetupAutomation
     public static void SetupAll()
     {
         EnsureFolders();
+        AudioGenerator.GenerateDefaultAudioFiles();
         CreateMaterials();
         CreatePrefabs();
 
@@ -39,6 +41,7 @@ public class SceneSetupAutomation
         if (!AssetDatabase.IsValidFolder("Assets/Materials")) AssetDatabase.CreateFolder("Assets", "Materials");
         if (!AssetDatabase.IsValidFolder("Assets/Prefabs")) AssetDatabase.CreateFolder("Assets", "Prefabs");
         if (!AssetDatabase.IsValidFolder("Assets/Scenes")) AssetDatabase.CreateFolder("Assets", "Scenes");
+        if (!AssetDatabase.IsValidFolder("Assets/Audio")) AssetDatabase.CreateFolder("Assets", "Audio");
     }
 
     private static Material GetOrCreateMaterial(string name, Color color)
@@ -117,7 +120,7 @@ public class SceneSetupAutomation
 
         GameObject eventSystem = new GameObject("EventSystem");
         eventSystem.AddComponent<EventSystem>();
-        eventSystem.AddComponent<StandaloneInputModule>();
+        eventSystem.AddComponent<InputSystemUIInputModule>();
 
         GameObject canvasGo = new GameObject("Canvas");
         Canvas canvas = canvasGo.AddComponent<Canvas>();
@@ -135,7 +138,7 @@ public class SceneSetupAutomation
         return (cam, light, canvas, sceneCtrl);
     }
 
-    private static TextMeshProUGUI CreateText(Transform parent, string text, Vector2 anchoredPos, Vector2 size, float fontSize, Color color, TextAlignmentOptions align)
+    private static TextMeshProUGUI CreateText(Transform parent, string text, Vector2 anchoredPos, Vector2 size, float fontSize, Color color, TextAlignmentOptions align, bool raycast = true)
     {
         GameObject textGo = new GameObject("Text_" + text);
         textGo.transform.SetParent(parent, false);
@@ -148,6 +151,7 @@ public class SceneSetupAutomation
         tmp.fontSize = fontSize;
         tmp.color = color;
         tmp.alignment = align;
+        tmp.raycastTarget = raycast;
         return tmp;
     }
 
@@ -163,13 +167,14 @@ public class SceneSetupAutomation
         img.color = new Color(0.2f, 0.45f, 0.8f);
 
         Button btn = btnGo.AddComponent<Button>();
+        btn.targetGraphic = img;
         ColorBlock colors = btn.colors;
         colors.normalColor = new Color(0.25f, 0.5f, 0.85f);
         colors.highlightedColor = new Color(0.35f, 0.65f, 1f);
         colors.pressedColor = new Color(0.15f, 0.35f, 0.65f);
         btn.colors = colors;
 
-        CreateText(btnGo.transform, label, Vector2.zero, size, 32, Color.white, TextAlignmentOptions.Center);
+        CreateText(btnGo.transform, label, Vector2.zero, size, 32, Color.white, TextAlignmentOptions.Center, false);
 
         if (isExit)
         {
@@ -185,10 +190,29 @@ public class SceneSetupAutomation
         return btn;
     }
 
+    private static GameObject CreateSlider(Transform parent, string name, Vector2 pos, Vector2 size)
+    {
+        DefaultControls.Resources res = new DefaultControls.Resources();
+        GameObject sliderGo = DefaultControls.CreateSlider(res);
+        sliderGo.name = name;
+        sliderGo.transform.SetParent(parent, false);
+        RectTransform rt = sliderGo.GetComponent<RectTransform>();
+        rt.anchoredPosition = pos;
+        rt.sizeDelta = size;
+        return sliderGo;
+    }
+
     private static void SetupMainMenu()
     {
         var scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
         var (_, _, canvas, ctrl) = CreateSceneBase("958321 Game Development 3 - Practical Examination");
+
+        // AudioManager setup with default clips
+        GameObject audioGo = new GameObject("AudioManager");
+        AudioManager audioMgr = audioGo.AddComponent<AudioManager>();
+        audioMgr.bgmClip = AssetDatabase.LoadAssetAtPath<AudioClip>("Assets/Resources/Audio/BGM_Default.wav");
+        audioMgr.itemSfxClip = AssetDatabase.LoadAssetAtPath<AudioClip>("Assets/Resources/Audio/SFX_Item.wav");
+        audioMgr.obstacleSfxClip = AssetDatabase.LoadAssetAtPath<AudioClip>("Assets/Resources/Audio/SFX_Obstacle.wav");
 
         CreateText(canvas.transform, "Student Code: 652110... | Name: Pasit", new Vector2(0, 290), new Vector2(800, 50), 30, new Color(0.8f, 0.8f, 0.8f), TextAlignmentOptions.Center);
 
@@ -217,11 +241,29 @@ public class SceneSetupAutomation
         var scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
         var (_, _, canvas, ctrl) = CreateSceneBase("Options");
 
-        CreateText(canvas.transform, "Volume Controls", new Vector2(0, 160), new Vector2(600, 60), 38, Color.yellow, TextAlignmentOptions.Center);
-        CreateText(canvas.transform, "BGM Volume: 100%", new Vector2(0, 80), new Vector2(500, 50), 30, Color.white, TextAlignmentOptions.Center);
-        CreateText(canvas.transform, "SFX Volume: 100%", new Vector2(0, 10), new Vector2(500, 50), 30, Color.white, TextAlignmentOptions.Center);
+        CreateText(canvas.transform, "Audio Settings", new Vector2(0, 220), new Vector2(600, 60), 38, Color.yellow, TextAlignmentOptions.Center);
 
-        CreateButton(canvas.transform, "Back to Main Menu", new Vector2(0, -140), new Vector2(340, 70), ctrl, "MainMenu");
+        var bgmText = CreateText(canvas.transform, "BGM Volume: 80%", new Vector2(0, 130), new Vector2(500, 45), 28, Color.white, TextAlignmentOptions.Center);
+        var bgmSliderGo = CreateSlider(canvas.transform, "Slider_BGM", new Vector2(0, 80), new Vector2(450, 32));
+
+        var sfxText = CreateText(canvas.transform, "SFX Volume: 80%", new Vector2(0, 10), new Vector2(500, 45), 28, Color.white, TextAlignmentOptions.Center);
+        var sfxSliderGo = CreateSlider(canvas.transform, "Slider_SFX", new Vector2(0, -40), new Vector2(450, 32));
+
+        OptionsController optCtrl = canvas.gameObject.AddComponent<OptionsController>();
+        Slider bSlider = bgmSliderGo.GetComponent<Slider>();
+        Slider sSlider = sfxSliderGo.GetComponent<Slider>();
+        optCtrl.bgmSlider = bSlider;
+        optCtrl.sfxSlider = sSlider;
+        optCtrl.bgmValueText = bgmText;
+        optCtrl.sfxValueText = sfxText;
+
+        UnityAction<float> bgmAction = new UnityAction<float>(optCtrl.OnBGMVolumeChanged);
+        UnityEventTools.AddPersistentListener(bSlider.onValueChanged, bgmAction);
+
+        UnityAction<float> sfxAction = new UnityAction<float>(optCtrl.OnSFXVolumeChanged);
+        UnityEventTools.AddPersistentListener(sSlider.onValueChanged, sfxAction);
+
+        CreateButton(canvas.transform, "Back to Main Menu", new Vector2(0, -160), new Vector2(340, 70), ctrl, "MainMenu");
 
         EditorSceneManager.SaveScene(scene, "Assets/Scenes/Options.unity");
     }
@@ -398,7 +440,7 @@ public class SceneSetupAutomation
         // EventSystem & HUD Canvas
         GameObject eventSystem = new GameObject("EventSystem");
         eventSystem.AddComponent<EventSystem>();
-        eventSystem.AddComponent<StandaloneInputModule>();
+        eventSystem.AddComponent<InputSystemUIInputModule>();
 
         GameObject canvasGo = new GameObject("Canvas");
         Canvas canvas = canvasGo.AddComponent<Canvas>();
