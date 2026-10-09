@@ -241,21 +241,38 @@ public class SceneSetupAutomation
         var scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
         var (_, _, canvas, ctrl) = CreateSceneBase("Options");
 
-        CreateText(canvas.transform, "Audio Settings", new Vector2(0, 220), new Vector2(600, 60), 38, Color.yellow, TextAlignmentOptions.Center);
+        // Use modern dark theme background
+        Camera.main.backgroundColor = new Color(0.08f, 0.1f, 0.12f);
 
-        var bgmText = CreateText(canvas.transform, "BGM Volume: 80%", new Vector2(0, 130), new Vector2(500, 45), 28, Color.white, TextAlignmentOptions.Center);
-        var bgmSliderGo = CreateSlider(canvas.transform, "Slider_BGM", new Vector2(0, 80), new Vector2(450, 32));
+        CreateText(canvas.transform, "Audio Settings", new Vector2(0, 300), new Vector2(600, 60), 48, new Color(0.9f, 0.7f, 0.2f), TextAlignmentOptions.Center);
 
-        var sfxText = CreateText(canvas.transform, "SFX Volume: 80%", new Vector2(0, 10), new Vector2(500, 45), 28, Color.white, TextAlignmentOptions.Center);
-        var sfxSliderGo = CreateSlider(canvas.transform, "Slider_SFX", new Vector2(0, -40), new Vector2(450, 32));
+        // Master Volume
+        var masterText = CreateText(canvas.transform, "Master Volume: 100%", new Vector2(0, 180), new Vector2(500, 45), 32, Color.white, TextAlignmentOptions.Center);
+        var masterSliderGo = CreateSlider(canvas.transform, "Slider_Master", new Vector2(0, 130), new Vector2(550, 40));
+
+        // BGM Volume
+        var bgmText = CreateText(canvas.transform, "BGM Volume: 80%", new Vector2(0, 50), new Vector2(500, 45), 32, Color.white, TextAlignmentOptions.Center);
+        var bgmSliderGo = CreateSlider(canvas.transform, "Slider_BGM", new Vector2(0, 0), new Vector2(550, 40));
+
+        // SFX Volume
+        var sfxText = CreateText(canvas.transform, "SFX Volume: 80%", new Vector2(0, -80), new Vector2(500, 45), 32, Color.white, TextAlignmentOptions.Center);
+        var sfxSliderGo = CreateSlider(canvas.transform, "Slider_SFX", new Vector2(0, -130), new Vector2(550, 40));
 
         OptionsController optCtrl = canvas.gameObject.AddComponent<OptionsController>();
+        Slider mSlider = masterSliderGo.GetComponent<Slider>();
         Slider bSlider = bgmSliderGo.GetComponent<Slider>();
         Slider sSlider = sfxSliderGo.GetComponent<Slider>();
+        
+        optCtrl.masterSlider = mSlider;
         optCtrl.bgmSlider = bSlider;
         optCtrl.sfxSlider = sSlider;
+        
+        optCtrl.masterValueText = masterText;
         optCtrl.bgmValueText = bgmText;
         optCtrl.sfxValueText = sfxText;
+
+        UnityAction<float> masterAction = new UnityAction<float>(optCtrl.OnMasterVolumeChanged);
+        UnityEventTools.AddPersistentListener(mSlider.onValueChanged, masterAction);
 
         UnityAction<float> bgmAction = new UnityAction<float>(optCtrl.OnBGMVolumeChanged);
         UnityEventTools.AddPersistentListener(bSlider.onValueChanged, bgmAction);
@@ -263,7 +280,7 @@ public class SceneSetupAutomation
         UnityAction<float> sfxAction = new UnityAction<float>(optCtrl.OnSFXVolumeChanged);
         UnityEventTools.AddPersistentListener(sSlider.onValueChanged, sfxAction);
 
-        CreateButton(canvas.transform, "Back to Main Menu", new Vector2(0, -160), new Vector2(340, 70), ctrl, "MainMenu");
+        CreateButton(canvas.transform, "Back to Main Menu", new Vector2(0, -250), new Vector2(340, 75), ctrl, "MainMenu");
 
         EditorSceneManager.SaveScene(scene, "Assets/Scenes/Options.unity");
     }

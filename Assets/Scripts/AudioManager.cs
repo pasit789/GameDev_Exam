@@ -32,9 +32,11 @@ namespace Pasit
         public AudioClip obstacleSfxClip;
 
         [Header("Volume Settings (0.0 to 1.0)")]
+        [Range(0f, 1f)] public float masterVolume = 1.0f;
         [Range(0f, 1f)] public float bgmVolume = 0.8f;
         [Range(0f, 1f)] public float sfxVolume = 0.8f;
 
+        private const string MASTER_KEY = "MasterVolume";
         private const string BGM_KEY = "BGMVolume";
         private const string SFX_KEY = "SFXVolume";
 
@@ -68,11 +70,11 @@ namespace Pasit
                 sfxSource.playOnAwake = false;
             }
 
+            masterVolume = PlayerPrefs.GetFloat(MASTER_KEY, 1.0f);
             bgmVolume = PlayerPrefs.GetFloat(BGM_KEY, 0.8f);
             sfxVolume = PlayerPrefs.GetFloat(SFX_KEY, 0.8f);
 
-            bgmSource.volume = bgmVolume;
-            sfxSource.volume = sfxVolume;
+            UpdateAudioSourcesVolume();
 
             if (bgmClip == null) bgmClip = Resources.Load<AudioClip>("Audio/BGM_Default");
             if (itemSfxClip == null) itemSfxClip = Resources.Load<AudioClip>("Audio/SFX_Item");
@@ -96,13 +98,30 @@ namespace Pasit
             }
         }
 
+        private void UpdateAudioSourcesVolume()
+        {
+            if (bgmSource != null)
+            {
+                bgmSource.volume = bgmVolume * masterVolume;
+            }
+            if (sfxSource != null)
+            {
+                sfxSource.volume = sfxVolume * masterVolume;
+            }
+        }
+
+        public void SetMasterVolume(float volume)
+        {
+            masterVolume = Mathf.Clamp01(volume);
+            UpdateAudioSourcesVolume();
+            PlayerPrefs.SetFloat(MASTER_KEY, masterVolume);
+            PlayerPrefs.Save();
+        }
+
         public void SetBGMVolume(float volume)
         {
             bgmVolume = Mathf.Clamp01(volume);
-            if (bgmSource != null)
-            {
-                bgmSource.volume = bgmVolume;
-            }
+            UpdateAudioSourcesVolume();
             PlayerPrefs.SetFloat(BGM_KEY, bgmVolume);
             PlayerPrefs.Save();
         }
@@ -110,10 +129,7 @@ namespace Pasit
         public void SetSFXVolume(float volume)
         {
             sfxVolume = Mathf.Clamp01(volume);
-            if (sfxSource != null)
-            {
-                sfxSource.volume = sfxVolume;
-            }
+            UpdateAudioSourcesVolume();
             PlayerPrefs.SetFloat(SFX_KEY, sfxVolume);
             PlayerPrefs.Save();
         }
@@ -122,7 +138,7 @@ namespace Pasit
         {
             if (sfxSource != null && itemSfxClip != null)
             {
-                sfxSource.PlayOneShot(itemSfxClip, sfxVolume);
+                sfxSource.PlayOneShot(itemSfxClip, sfxVolume * masterVolume);
             }
         }
 
@@ -130,7 +146,7 @@ namespace Pasit
         {
             if (sfxSource != null && obstacleSfxClip != null)
             {
-                sfxSource.PlayOneShot(obstacleSfxClip, sfxVolume);
+                sfxSource.PlayOneShot(obstacleSfxClip, sfxVolume * masterVolume);
             }
         }
     }
