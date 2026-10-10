@@ -1323,6 +1323,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Pasit.CapsulePlayer
   speed: 7
+  jumpHeight: 1.5
   gravity: -9.81
 --- !u!143 &618286229
 CharacterController:
