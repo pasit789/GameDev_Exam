@@ -1,4 +1,6 @@
 using UnityEngine;
+using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 using TMPro;
 
 namespace Pasit
@@ -30,14 +32,28 @@ namespace Pasit
                 scoreText.text = "Score : " + score.ToString();
             }
 
-            // Dynamically update retry button label if player played Stage 2
+            // Wire the Retry/PlayAgain button specifically to the last stage played
             string lastStage = PlayerPrefs.GetString("LastStage", "Stage1");
-            var allTexts = FindObjectsByType<TextMeshProUGUI>();
-            foreach (var t in allTexts)
+            var allButtons = FindObjectsByType<Button>();
+            foreach (var b in allButtons)
             {
-                if (t.text.Contains("(STAGE 1)") && lastStage == "Stage2")
+                if (b.name.Contains("PlayAgain") || b.name.Contains("TryAgain"))
                 {
-                    t.text = t.text.Replace("(STAGE 1)", "(STAGE 2)");
+                    var tmp = b.GetComponentInChildren<TextMeshProUGUI>();
+                    if (tmp != null)
+                    {
+                        if (lastStage == "Stage2")
+                        {
+                            tmp.text = tmp.text.Replace("(STAGE 1)", "(STAGE 2)");
+                        }
+                    }
+
+                    b.onClick.RemoveAllListeners();
+                    b.onClick.AddListener(() => {
+                        Cursor.lockState = CursorLockMode.None;
+                        Cursor.visible = true;
+                        SceneManager.LoadScene(lastStage);
+                    });
                 }
             }
         }

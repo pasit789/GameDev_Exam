@@ -22,16 +22,17 @@ namespace Pasit
         {
             Cursor.lockState = CursorLockMode.None;
             Cursor.visible = true;
-
-            // If player just played Stage 2 and clicks the retry button (which targets Stage1 by default)
-            string lastStage = PlayerPrefs.GetString("LastStage", "");
-            if (sceneName == "Stage1" && lastStage == "Stage2")
-            {
-                sceneName = "Stage2";
-            }
-
             Debug.Log("[SceneController] Loading scene: " + sceneName);
             SceneManager.LoadScene(sceneName);
+        }
+
+        public void ReplayLastStage()
+        {
+            Cursor.lockState = CursorLockMode.None;
+            Cursor.visible = true;
+            string lastStage = PlayerPrefs.GetString("LastStage", "Stage1");
+            Debug.Log("[SceneController] Replaying last stage: " + lastStage);
+            SceneManager.LoadScene(lastStage);
         }
 
         public void ExitGame()
