@@ -24,6 +24,8 @@ namespace Pasit
 
         private void Start()
         {
+            PlayerPrefs.SetString("LastStage", SceneManager.GetActiveScene().name);
+
             if (timeText == null || scoreText == null)
             {
                 var texts = FindObjectsByType<TextMeshProUGUI>();
@@ -75,6 +77,8 @@ namespace Pasit
             isGameOver = true;
             LastScore = currentScore;
             PlayerPrefs.SetInt("LastScore", currentScore);
+            Cursor.lockState = CursorLockMode.None;
+            Cursor.visible = true;
             SceneManager.LoadScene("GameOver");
         }
 
@@ -83,6 +87,8 @@ namespace Pasit
             isGameOver = true;
             LastScore = currentScore;
             PlayerPrefs.SetInt("LastScore", currentScore);
+            Cursor.lockState = CursorLockMode.None;
+            Cursor.visible = true;
 
             // Winning condition: score > 10000 within 30 seconds
             if (currentScore > 10000)

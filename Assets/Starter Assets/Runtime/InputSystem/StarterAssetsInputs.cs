@@ -66,6 +66,23 @@ namespace StarterAssets
 			sprint = newSprintState;
 		}
 		
+		private void Update()
+		{
+#if ENABLE_INPUT_SYSTEM
+			if (Keyboard.current != null && Keyboard.current.escapeKey.wasPressedThisFrame)
+			{
+				cursorLocked = !cursorLocked;
+				SetCursorState(cursorLocked);
+			}
+#else
+			if (Input.GetKeyDown(KeyCode.Escape))
+			{
+				cursorLocked = !cursorLocked;
+				SetCursorState(cursorLocked);
+			}
+#endif
+		}
+
 		private void OnApplicationFocus(bool hasFocus)
 		{
 			SetCursorState(cursorLocked);
@@ -74,6 +91,17 @@ namespace StarterAssets
 		private void SetCursorState(bool newState)
 		{
 			Cursor.lockState = newState ? CursorLockMode.Locked : CursorLockMode.None;
+			Cursor.visible = !newState;
+		}
+
+		private void OnDisable()
+		{
+			SetCursorState(false);
+		}
+
+		private void OnDestroy()
+		{
+			SetCursorState(false);
 		}
 	}
 	

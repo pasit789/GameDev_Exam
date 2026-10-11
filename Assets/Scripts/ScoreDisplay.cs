@@ -7,8 +7,18 @@ namespace Pasit
     {
         public TextMeshProUGUI scoreText;
 
+        private void Awake()
+        {
+            // Ensure mouse cursor is fully unlocked and visible in Win/GameOver screens
+            Cursor.lockState = CursorLockMode.None;
+            Cursor.visible = true;
+        }
+
         private void Start()
         {
+            Cursor.lockState = CursorLockMode.None;
+            Cursor.visible = true;
+
             if (scoreText == null)
             {
                 scoreText = GetComponent<TextMeshProUGUI>();
@@ -18,6 +28,27 @@ namespace Pasit
             if (scoreText != null)
             {
                 scoreText.text = "Score : " + score.ToString();
+            }
+
+            // Dynamically update retry button label if player played Stage 2
+            string lastStage = PlayerPrefs.GetString("LastStage", "Stage1");
+            var allTexts = FindObjectsByType<TextMeshProUGUI>();
+            foreach (var t in allTexts)
+            {
+                if (t.text.Contains("(STAGE 1)") && lastStage == "Stage2")
+                {
+                    t.text = t.text.Replace("(STAGE 1)", "(STAGE 2)");
+                }
+            }
+        }
+
+        private void Update()
+        {
+            // Safeguard: keep cursor free in results screens
+            if (Cursor.lockState != CursorLockMode.None || !Cursor.visible)
+            {
+                Cursor.lockState = CursorLockMode.None;
+                Cursor.visible = true;
             }
         }
     }
