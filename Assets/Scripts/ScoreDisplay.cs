@@ -37,7 +37,8 @@ namespace Pasit
             var allButtons = FindObjectsByType<Button>();
             foreach (var b in allButtons)
             {
-                if (b.name.Contains("PlayAgain") || b.name.Contains("TryAgain"))
+                string cleanName = b.name.ToLower().Replace(" ", "").Replace("_", "");
+                if (cleanName.Contains("playagain") || cleanName.Contains("tryagain") || cleanName.Contains("retry"))
                 {
                     var tmp = b.GetComponentInChildren<TextMeshProUGUI>();
                     if (tmp != null)

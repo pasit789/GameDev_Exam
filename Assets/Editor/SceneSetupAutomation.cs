@@ -9,6 +9,7 @@ using UnityEngine.EventSystems;
 using UnityEngine.InputSystem.UI;
 using UnityEngine.UI;
 using TMPro;
+using UnityEngine.ProBuilder;
 using Pasit;
 
 public class SceneSetupAutomation
@@ -21,6 +22,31 @@ public class SceneSetupAutomation
         SetupOptions();
         EditorSceneManager.OpenScene("Assets/Scenes/Options.unity");
         Debug.Log("==== OPTIONS SCENE SUCCESSFULLY UPGRADED TO MODERN UI! ====");
+    }
+
+    [MenuItem("Tools/Pasit/Upgrade Stage 1 to ProBuilder")]
+    public static void UpgradeStage1ToProBuilder()
+    {
+        var scene = EditorSceneManager.OpenScene("Assets/Scenes/Stage1.unity");
+        GameObject levelGo = GameObject.Find("Level");
+        if (levelGo != null)
+        {
+            UnityEngine.Object.DestroyImmediate(levelGo);
+        }
+
+        Material matPlatform = AssetDatabase.LoadAssetAtPath<Material>("Assets/Materials/Mat_Platform.mat");
+        Material matBridge = AssetDatabase.LoadAssetAtPath<Material>("Assets/Materials/Mat_Bridge.mat");
+
+        GameObject levelRoot = new GameObject("Level");
+
+        CreatePlatform(levelRoot.transform, "Platform_Start", new Vector3(0, 0, 0), new Vector3(10, 1, 10), matPlatform);
+        CreatePlatform(levelRoot.transform, "Narrow_Bridge_1", new Vector3(0, 0, 13), new Vector3(2.2f, 0.8f, 16), matBridge);
+        CreatePlatform(levelRoot.transform, "Platform_Middle", new Vector3(0, 0, 25), new Vector3(8, 1, 8), matPlatform);
+        CreatePlatform(levelRoot.transform, "Narrow_Bridge_2", new Vector3(0, 0, 36), new Vector3(1.6f, 0.8f, 14), matBridge);
+        CreatePlatform(levelRoot.transform, "Platform_End", new Vector3(0, 0, 49), new Vector3(12, 1, 12), matPlatform);
+
+        EditorSceneManager.SaveScene(scene);
+        Debug.Log("==== STAGE 1 LEVEL DESIGN SUCCESSFULLY UPGRADED TO PROBUILDER! ====");
     }
 
     [MenuItem("Tools/Pasit/Setup All Scenes and Assets (Q1-Q5)")]
@@ -1213,7 +1239,7 @@ public class SceneSetupAutomation
         scoreTxt.fontStyle = FontStyles.Bold;
 
         // Top Right Menu Button
-        GameObject menuBtnGo = CreateButton(canvas.transform, "MENU", Vector2.zero, new Vector2(180, 56), sceneCtrl, "MainMenu").gameObject;
+        GameObject menuBtnGo = CreateButton(canvas.transform, "MENU", Vector2.zero, new Vector2(180, 56), sceneCtrl, "StageSelection").gameObject;
         RectTransform rtMenuBtn = menuBtnGo.GetComponent<RectTransform>();
         rtMenuBtn.anchorMin = new Vector2(1, 1);
         rtMenuBtn.anchorMax = new Vector2(1, 1);
@@ -1231,12 +1257,15 @@ public class SceneSetupAutomation
 
     private static void CreatePlatform(Transform parent, string name, Vector3 pos, Vector3 size, Material mat)
     {
-        GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
-        cube.name = name;
-        cube.transform.SetParent(parent);
-        cube.transform.position = pos;
-        cube.transform.localScale = size;
-        if (mat != null) cube.GetComponent<Renderer>().sharedMaterial = mat;
+        var pbMesh = ShapeGenerator.CreateShape(ShapeType.Cube);
+        pbMesh.gameObject.name = name;
+        pbMesh.transform.SetParent(parent, false);
+        pbMesh.transform.position = pos;
+        pbMesh.transform.localScale = size;
+        if (mat != null) pbMesh.GetComponent<MeshRenderer>().sharedMaterial = mat;
+        var collider = pbMesh.gameObject.AddComponent<BoxCollider>();
+        collider.center = Vector3.zero;
+        collider.size = Vector3.one;
     }
 
     private static void SpawnItem(GameObject prefab, Transform parent, Vector3 pos)
