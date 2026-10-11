@@ -11,6 +11,14 @@ namespace Pasit
         [Tooltip("If true, requires manual interaction (e.g. Press E) instead of collision check.")]
         public bool requireInteraction = false;
 
+        private void Update()
+        {
+            if (type == ItemType.AddScore || type == ItemType.AddTime)
+            {
+                transform.Rotate(Vector3.up, 60f * Time.deltaTime, Space.World);
+            }
+        }
+
         private void OnTriggerEnter(Collider other)
         {
             // Stage 2 requirement: Use interaction system instead of collision check

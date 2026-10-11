@@ -38,8 +38,15 @@ namespace Pasit.Editor
             CreateGlowDividerSprite($"{FOLDER_PATH}/UI_Divider_Green.png", 256, 8, new Color(0.15f, 0.85f, 0.45f, 0.85f));
             CreateGlowDividerSprite($"{FOLDER_PATH}/UI_Divider_Red.png", 256, 8, new Color(0.95f, 0.30f, 0.30f, 0.85f));
 
+            // Vibrant Theme Sprites (Matching the colorful FBX asset palette)
+            CreateRoundedCardSprite($"{FOLDER_PATH}/UI_Vibrant_Card.png", 128, 128, 24, new Color(0.12f, 0.09f, 0.08f, 0.90f), new Color(0.95f, 0.68f, 0.20f, 0.95f), 3.5f, 28);
+            CreateRoundedCardSprite($"{FOLDER_PATH}/UI_Vibrant_Banner.png", 128, 64, 16, new Color(0.08f, 0.32f, 0.22f, 0.95f), new Color(1.0f, 0.82f, 0.20f, 1.0f), 3.0f, 20);
+            CreateRoundedCardSprite($"{FOLDER_PATH}/UI_Vibrant_Prompt.png", 128, 64, 26, new Color(0.10f, 0.65f, 0.32f, 0.96f), new Color(1.0f, 0.90f, 0.25f, 1.0f), 3.5f, 28);
+            CreateRoundedCardSprite($"{FOLDER_PATH}/UI_Vibrant_Button.png", 128, 128, 22, new Color(0.48f, 0.26f, 0.12f, 0.98f), new Color(1.0f, 0.78f, 0.25f, 1.0f), 3.0f, 26);
+            CreateRoundedCardSprite($"{FOLDER_PATH}/UI_Vibrant_Button_Hover.png", 128, 128, 22, new Color(0.62f, 0.35f, 0.16f, 1.0f), new Color(1.0f, 0.92f, 0.40f, 1.0f), 3.5f, 26);
+
             AssetDatabase.Refresh();
-            Debug.Log("[UISpriteGenerator] All Modern UI Sprites generated successfully in " + FOLDER_PATH);
+            Debug.Log("[UISpriteGenerator] All Modern & Vibrant UI Sprites generated successfully in " + FOLDER_PATH);
         }
 
         private static void CreateRoundedCardSprite(string path, int width, int height, float radius, Color fillColor, Color borderColor, float borderWidth, int borderPadding)
